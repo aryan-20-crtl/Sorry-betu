@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Sorry Betuuuu ❤️</title>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+<style>
+:root{
+ --bg:#ece5dd;--chat:#fff;--me:#dcf8c6;--you:#fff;--txt:#000;
+}
+.dark{
+ --bg:#111;--chat:#222;--me:#054740;--you:#333;--txt:#fff;
+}
+body{
+ margin:0;font-family:Arial;
+ background:linear-gradient(135deg,#ff758c,#ff7eb3);
+ display:flex;justify-content:center;align-items:center;height:100vh;
+}
+.app{width:380px;background:var(--bg);border-radius:15px;overflow:hidden;box-shadow:0 0 20px #000;color:var(--txt);}
+header{background:#075E54;color:white;padding:10px;display:flex;align-items:center;justify-content:space-between;}
+header img{width:35px;height:35px;border-radius:50%}
+.status{font-size:12px;opacity:.7}
+.hidden{display:none}
+.chatBody{height:260px;overflow-y:auto;padding:10px;background:var(--chat);}
+.row{display:flex;align-items:flex-end;gap:5px;margin:5px 0;}
+.row.me{justify-content:flex-end}
+.dp{width:28px;height:28px;border-radius:50%;}
+.msg{max-width:65%;padding:8px;border-radius:10px;font-size:14px;}
+.meBubble{background:var(--me)}
+.youBubble{background:var(--you)}
+.time{font-size:10px;opacity:.6;text-align:right;}
+.inputBox{display:flex;gap:5px;padding:5px;background:#f0f0f0;}
+input{flex:1;padding:10px;border-radius:20px;border:none;}
+button{border:none;background:#075E54;color:white;border-radius:50%;width:40px;}
+.slider{display:flex;overflow-x:auto;gap:10px;padding:10px;background:#fff;}
+.slider img{height:100px;border-radius:10px;}
+.emoji{position:absolute;bottom:60px;background:white;padding:5px;border-radius:10px;}
+.typing{font-size:12px;color:gray;padding:5px}
+.sorryNote{padding:20px;text-align:center;font-size:18px;color:#ff0066;}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+<!-- LOGIN -->
+<div id="login" style="padding:20px;text-align:center">
+ <h2>Login ❤️</h2>
+ <input id="nameInput" placeholder="Enter Your Name"><br><br>
+ <input id="passInput" type="password" placeholder="Enter Password"><br><br>
+ <button onclick="startChat()">Start</button>
+</div>
+
+<!-- SORRY + SLIDER -->
+<div id="sorrySection" class="hidden">
+ <div class="sorryNote">
+   ❤️ I am so Sorry Betuu, agli br se aisa kuch nhi hoga sorrrrry ❤️
+ </div>
+ <div class="slider">
+   <img src="p1.jpg">
+   <img src="p2.jpg">
+   <img src="p3.jpg">
+ </div>
+ <button onclick="openChat()" style="margin:10px;padding:10px 20px;border:none;background:#075E54;color:white;border-radius:10px;">Open Chat 💌</button>
+ <button onclick="backToLogin()" style="margin:0 10px 10px 10px;padding:10px 20px;border:none;background:#ff3366;color:white;border-radius:10px;">Back 🔙</button>
+</div>
+
+<!-- MAIN CHAT -->
+<div id="main" class="hidden">
+<header>
+ <div style="display:flex;gap:8px;align-items:center">
+  <img src="dp_you.jpg">
+  <div>
+   <b id="chatTitle">Betuu❤️</b><br>
+   <span id="statusText" class="status">online</span>
+  </div>
+ </div>
+ <button onclick="toggleDark()">🌙</button>
+</header>
+
+<div class="chatBody" id="msgs"></div>
+<div id="typing" class="typing"></div>
+
+<div class="inputBox">
+ <button onclick="toggleEmoji()">😊</button>
+ <input id="msgInput" placeholder="Message...">
+ <button onclick="send()">➤</button>
+</div>
+
+<div id="emojiBox" class="emoji hidden">
+ 😄 😍 🥺 ❤️ 😘 😭 🔥
+</div>
+
+<button onclick="backToSorry()" style="margin:10px;padding:10px 20px;border:none;background:#ff3366;color:white;border-radius:10px;">Back 🔙</button>
+
+<audio id="music" src="music.mp3" loop></audio>
+<audio id="notify" src="notify.mp3"></audio>
+</div>
+
+</div>
+
+<script>
+/* ================= FIREBASE CONFIG ================= */
+firebase.initializeApp({
+ apiKey: "AIzaSyCqpPTl9q8t__POAgQsCW8W82vWMVJknOo",
+ databaseURL: "https://sorry-23d3a-default-rtdb.firebaseio.com"
+});
+let db = firebase.database();
+let myName = "";
+
+/* ================= START CHAT ================= */
+function startChat(){
+ let nameVal = nameInput.value.trim();
+ let passVal = passInput.value.trim();
+ if(!nameVal || !passVal){
+  alert("Name & Password required!");
+  return;
+ }
+ myName = nameVal;
+ login.classList.add("hidden");
+ sorrySection.classList.remove("hidden");
+ music.play(); // song auto-play in slider section
+}
+
+/* ================= OPEN CHAT ================= */
+function openChat(){
+ sorrySection.classList.add("hidden");
+ main.classList.remove("hidden");
+ chatTitle.innerText = myName;
+ music.pause(); // song stop when chat opens
+}
+
+/* ================= BACK BUTTONS ================= */
+function backToLogin(){
+ sorrySection.classList.add("hidden");
+ login.classList.remove("hidden");
+ music.pause();
+}
+function backToSorry(){
+ main.classList.add("hidden");
+ sorrySection.classList.remove("hidden");
+ music.play();
+}
+
+/* ================= CHAT SEND ================= */
+function send(){
+ let t = msgInput.value.trim();
+ if(!t) return;
+ db.ref("chat").push({
+  text:t,
+  name:myName,
+  time:new Date().toISOString()
+ });
+ msgInput.value="";
+}
+
+msgInput.oninput=()=>{
+ db.ref("typing").set(myName+" is typing...");
+ setTimeout(()=>db.ref("typing").set(""),1000);
+}
+
+/* ================= TYPING ================= */
+db.ref("typing").on("value",s=>{
+ typing.innerText = s.val() || "";
+});
+
+/* ================= RECEIVE CHAT ================= */
+db.ref("chat").on("child_added",s=>{
+ let d = s.val();
+ let isMe = d.name === myName;
+ let dp = isMe ? "dp_me.jpg" : "dp_you.jpg";
+ if(!isMe) notify.play();
+
+ let msgTime = new Date(d.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+ msgs.innerHTML += `
+ <div class="row ${isMe ? "me" : ""}">
+   ${!isMe ? `<img src="${dp}" class="dp">`:""}
+   <div class="msg ${isMe?"meBubble":"youBubble"}">
+     ${d.text}
+     <div class="time">${isMe?"✔✔ ":""}${msgTime}</div>
+   </div>
+   ${isMe ? `<img src="${dp}" class="dp">`:""}
+ </div>
+ `;
+ msgs.scrollTop = msgs.scrollHeight;
+});
+
+/* ================= UI ================= */
+function toggleDark(){
+ document.body.classList.toggle("dark");
+}
+function toggleEmoji(){
+ emojiBox.classList.toggle("hidden");
+}
+emojiBox.onclick = e=>{
+ msgInput.value += e.target.innerText;
+};
+</script>
+</body>
+</html>
